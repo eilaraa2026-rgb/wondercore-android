@@ -1,0 +1,56 @@
+name: Build Quill Studio Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Extract Android source
+        run: |
+          unzip Quill_Studio_Android_Source_v0.1.zip -d extracted
+          ls -la extracted
+          ls -la extracted/Quill_Studio_Android_Source_v0.1 || true
+
+      - name: Set project directory
+        run: |
+          if [ -f extracted/settings.gradle ]; then
+            echo "PROJECT_DIR=extracted" >> $GITHUB_ENV
+          elif [ -f extracted/Quill_Studio_Android_Source_v0.1/settings.gradle ]; then
+            echo "PROJECT_DIR=extracted/Quill_Studio_Android_Source_v0.1" >> $GITHUB_ENV
+          else
+            echo "Could not find settings.gradle after extraction"
+            find extracted -maxdepth 3 -type f | sort
+            exit 1
+          fi
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build debug APK
+        run: |
+          cd "$PROJECT_DIR"
+          gradle :app:assembleDebug --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quill-Studio-Android-v0.1-debug
+          path: ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
