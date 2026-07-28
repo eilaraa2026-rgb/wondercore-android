@@ -14,13 +14,30 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Extract Android source
-        run: |
-          unzip Quill_Studio_Android_Source_v0.1.zip -d extracted
-          ls -la extracted
-          ls -la extracted/Quill_Studio_Android_Source_v0.1 || true
-
+      - 
       - name: Set project directory
+      - name: Extract Android source
+  shell: bash
+  run: |
+    set -e
+
+    ZIP_FILE=$(find . -maxdepth 1 -type f \( \
+      -name "WonderCore_Android_Source*.zip" -o \
+      -name "Quill_Studio_Android_Source*.zip" \
+      \) | head -n 1)
+
+    if [ -z "$ZIP_FILE" ]; then
+      echo "No Android source ZIP found."
+      exit 1
+    fi
+
+    echo "Using: $ZIP_FILE"
+
+    rm -rf extracted
+    mkdir extracted
+
+    unzip "$ZIP_FILE" -d extracted
+      
         run: |
           if [ -f extracted/settings.gradle ]; then
             echo "PROJECT_DIR=extracted" >> $GITHUB_ENV
