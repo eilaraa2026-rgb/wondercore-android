@@ -108,19 +108,41 @@ jobs:
           gradle wrapper --gradle-version 8.9 --distribution-type bin
           chmod +x gradlew
 
-      - name: Run Build Doctor
+            - name: Run Build Doctor
         shell: bash
         run: |
           set -euo pipefail
           cd "$PROJECT_DIR"
 
-          if [ ! -f scripts/validate-project.sh ]; then
-            echo "::error::scripts/validate-project.sh is missing."
-            exit 1
-          fi
+          echo "WonderCore Build Doctor"
+          echo "Project root: $(pwd)"
 
-          chmod +x scripts/validate-project.sh
-          ./scripts/validate-project.sh .
+          test -f settings.gradle || {
+            echo "::error::settings.gradle is missing."
+            exit 1
+          }
+
+          test -f build.gradle || {
+            echo "::error::build.gradle is missing."
+            exit 1
+          }
+
+          test -d app || {
+            echo "::error::Android app directory is missing."
+            exit 1
+          }
+
+          test -f app/build.gradle || {
+            echo "::error::app/build.gradle is missing."
+            exit 1
+          }
+
+          test -x gradlew || {
+            echo "::error::Gradle wrapper is not executable."
+            exit 1
+          }
+
+          echo "WonderCore project structure validated." 
 
       - name: Build debug APK
         shell: bash
