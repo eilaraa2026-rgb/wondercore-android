@@ -1,4 +1,4 @@
-name: Build WonderCore Android APK
+name: Build WonderCore Android APK v0.2
 
 on:
   workflow_dispatch:
