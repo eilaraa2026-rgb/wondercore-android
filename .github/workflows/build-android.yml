@@ -146,7 +146,7 @@ jobs:
           echo "APK successfully packaged:"
           ls -lh build-output/
 
-      - name: Upload WonderCore APK
+      - name: Upload WonderPresence APK
         uses: actions/upload-artifact@v4
         with:
           name: WonderCore-v0.2-Installable-APK
