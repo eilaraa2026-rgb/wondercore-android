@@ -116,7 +116,7 @@ jobs:
             clean \
             assembleDebug
 
-      - name: Package WonderCore APK
+      - name: Package WonderPresence APK
         id: package
         shell: bash
         run: |
