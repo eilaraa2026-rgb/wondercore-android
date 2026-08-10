@@ -30,7 +30,7 @@ jobs:
 
           ZIP_FILE="./WonderPresence_Android_Source_v0.3_WONDERPRESENCE_ALPHA_7.13.zip"
           if [ -z "$ZIP_FILE" ]; then
-            echo "::error::No WonderCore Android source ZIP was found."
+            echo "::error::No WonderPresence Android source ZIP was found."
             echo "Repository root contains:"
             ls -la
             exit 1
