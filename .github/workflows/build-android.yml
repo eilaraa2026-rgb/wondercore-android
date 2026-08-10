@@ -149,7 +149,7 @@ jobs:
       - name: Upload WonderPresence APK
         uses: actions/upload-artifact@v4
         with:
-          name: WonderCore-v0.2-Installable-APK
+          name: WonderPresence-v0.3-Installable-APK
           path: |
             build-output/WonderCore-v0.2-debug.apk
             build-output/WonderCore-v0.2-debug.apk.sha256
