@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - "WonderCore_Android_Source*.zip"
+      
       - "WonderPresence_Android_Source*.zip"
       - ".github/workflows/build-android.yml"
 
