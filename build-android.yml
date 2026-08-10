@@ -1,0 +1,92 @@
+name: WonderPresence Alpha APK Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - "app/**"
+      - "gradle/**"
+      - "scripts/**"
+      - "build.gradle"
+      - "settings.gradle"
+      - "gradle.properties"
+      - "gradlew"
+      - "WonderCore_Android_Source*.zip"
+      - ".github/workflows/build-android.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Locate newest WonderPresence source
+        id: project
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP_FILE="$(find . -maxdepth 1 -type f -name 'WonderCore_Android_Source*.zip' -print | sort -V | tail -n1)"
+          if [[ -n "${ZIP_FILE:-}" ]]; then
+            echo "Building from source ZIP: $ZIP_FILE"
+            mkdir -p "$RUNNER_TEMP/wonderpresence-source"
+            unzip -q "$ZIP_FILE" -d "$RUNNER_TEMP/wonderpresence-source"
+            PROJECT_ROOT="$(find "$RUNNER_TEMP/wonderpresence-source" -type f -name settings.gradle -printf '%h\n' | head -n1)"
+            [[ -n "$PROJECT_ROOT" ]] || { echo "::error::No Android project root found inside $ZIP_FILE"; exit 1; }
+            echo "root=$PROJECT_ROOT" >> "$GITHUB_OUTPUT"
+          elif [[ -f gradlew && -d app ]]; then
+            echo "No source ZIP found; building repository root."
+            echo "root=$GITHUB_WORKSPACE" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::No WonderPresence Android source found."
+            exit 1
+          fi
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Regenerate trusted Gradle Wrapper
+        working-directory: ${{ steps.project.outputs.root }}
+        run: gradle wrapper --gradle-version 8.9 --distribution-type bin
+
+      - name: Build Doctor
+        working-directory: ${{ steps.project.outputs.root }}
+        run: |
+          chmod +x gradlew scripts/validate-project.sh
+          ./scripts/validate-project.sh .
+
+      - name: Build installable Alpha APK
+        working-directory: ${{ steps.project.outputs.root }}
+        run: ./gradlew --no-daemon --stacktrace clean assembleDebug
+
+      - name: Validate APK
+        working-directory: ${{ steps.project.outputs.root }}
+        run: |
+          APK="$(find app/build/outputs/apk/debug -name '*.apk' -print -quit)"
+          [[ -n "$APK" ]] || { echo "::error::No APK produced."; exit 1; }
+          SIZE="$(stat -c%s "$APK")"
+          echo "APK size: $SIZE bytes"
+          [[ "$SIZE" -gt 50000 ]] || { echo "::error::APK is suspiciously small."; exit 1; }
+          mkdir -p "$GITHUB_WORKSPACE/build-output"
+          cp "$APK" "$GITHUB_WORKSPACE/build-output/WonderPresence-Alpha-v0.3-debug.apk"
+          sha256sum "$GITHUB_WORKSPACE/build-output/WonderPresence-Alpha-v0.3-debug.apk" > "$GITHUB_WORKSPACE/build-output/WonderPresence-Alpha-v0.3-debug.apk.sha256"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: WonderPresence-Alpha-v0.3-APK
+          path: build-output/*
+          if-no-files-found: error
+          retention-days: 30
