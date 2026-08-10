@@ -28,7 +28,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          ZIP_FILE="./WonderPresence_Android_Source_v0.3_WONDERPRESENCE_ALPHA_7.13.zip"
+          ZIP_FILE="$(ls -1t ./WonderPresence_Android_Source*.zip | head -n 1)"
           if [ -z "$ZIP_FILE" ]; then
             echo "::error::No WonderPresence Android source ZIP was found."
             echo "Repository root contains:"
