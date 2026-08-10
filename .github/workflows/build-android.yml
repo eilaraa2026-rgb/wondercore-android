@@ -7,7 +7,7 @@ on:
       - main
     paths:
       - "WonderCore_Android_Source*.zip"
-      - "Quill_Studio_Android_Source*.zip"
+      - "WonderPresence_Android_Source*.zip"
       - ".github/workflows/build-android.yml"
 
 permissions:
