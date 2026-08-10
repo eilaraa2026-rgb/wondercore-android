@@ -137,7 +137,7 @@ jobs:
           mkdir -p build-output
 
           cp "$APK_FILE" \
-            build-output/WonderCore-v0.2-debug.apk
+            build-output/WonderPresence-v0.3-debug.apk
 
           sha256sum \
             build-output/WonderCore-v0.2-debug.apk \
