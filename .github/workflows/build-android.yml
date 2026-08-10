@@ -151,7 +151,7 @@ jobs:
         with:
           name: WonderPresence-v0.3-Installable-APK
           path: |
-            build-output/WonderCore-v0.2-debug.apk
+            build-output/WonderPresence-v0.3-debug.apk
             build-output/WonderCore-v0.2-debug.apk.sha256
           if-no-files-found: error
           retention-days: 30
